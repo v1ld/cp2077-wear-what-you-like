@@ -2,20 +2,21 @@
 -- This code is licensed under MIT license (see LICENSE for details)
 
 WearWhatYouWant = {
-    description = "WearWhatYouWant allows you to add slots unequip mods from armor",
-    version = "v1.0"
+    description = 'WearWhatYouWant allows you to add slots unequip mods from armor',
+    version = 'v1.0'
 }
 
-function WearWhatYouWant.start()
-    WearWhatYouWant.UI = require("ui/ui")
-    WearWhatYouWant.Core = require("core/core")
+local UI = require('ui')
+local Core = require('core')
+local GameUI = require('GameUI')
 
-    registerForEvent("onInit", function()
-        print('WearWhatYouWant ' .. WearWhatYouWant.version .. ' initialized!')
+registerForEvent("onInit", function()
+    GameUI.OnLoaded(function()
+        Core.OnGameLoaded()
     end)
+    print('WearWhatYouWant ' .. WearWhatYouWant.version .. ' initialized!')
+end)
 
-    WearWhatYouWant.UI.run(WearWhatYouWant.version, WearWhatYouWant.Core)
-end
+UI.run(WearWhatYouWant.version)
 
-WearWhatYouWant.start()
 return WearWhatYouWant

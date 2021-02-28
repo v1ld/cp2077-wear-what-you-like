@@ -3,7 +3,9 @@
 
 local UI = {}
 
-function UI.run(version, core)
+local Core = require('core')
+
+function UI.run(version)
     local showUI = false
     local head, face, innerChest, outerChest, legs, feet = false, false, false, false, false, false
 
@@ -58,7 +60,7 @@ function UI.run(version, core)
             ImGui.TextColored(1, 1, 0, 1, "Armor mods:")
             ImGui.Spacing()
             if (ImGui.Button("Remove mods", buttonWidth, buttonHeight)) then
-                lastLog = core.ArmorRemoveMods(armorSlots)
+                lastLog = Core.ArmorRemoveMods(armorSlots)
             end
             ImGui.Spacing()
             ImGui.Separator()
@@ -67,23 +69,23 @@ function UI.run(version, core)
             ImGui.TextColored(1, 1, 0, 1, "Change rarity to:")
             ImGui.Spacing()
             if (ImGui.Button("Common", buttonWidth, buttonHeight)) then
-                lastLog = core.ArmorSetRarity("Common", armorSlots)
+                lastLog = Core.ArmorSetRarity("Common", armorSlots)
             end
             ImGui.SameLine()
             if (ImGui.Button("Uncommon", buttonWidth, buttonHeight)) then
-                lastLog = core.ArmorSetRarity("Uncommon", armorSlots)
+                lastLog = Core.ArmorSetRarity("Uncommon", armorSlots)
             end
             ImGui.SameLine()
             if (ImGui.Button("Rare", buttonWidth, buttonHeight)) then
-                lastLog = core.ArmorSetRarity("Rare", armorSlots)
+                lastLog = Core.ArmorSetRarity("Rare", armorSlots)
             end
             ImGui.SameLine()
             if (ImGui.Button("Epic", buttonWidth, buttonHeight)) then
-                lastLog = core.ArmorSetRarity("Epic", armorSlots)
+                lastLog = Core.ArmorSetRarity("Epic", armorSlots)
             end
             ImGui.SameLine()
             if (ImGui.Button("Legendary", buttonWidth, buttonHeight)) then
-                lastLog = core.ArmorSetRarity("Legendary", armorSlots)
+                lastLog = Core.ArmorSetRarity("Legendary", armorSlots)
             end
             ImGui.Spacing()
             ImGui.Separator()

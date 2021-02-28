@@ -15,9 +15,13 @@ for i,v in pairs(rarityValue) do
     rarityName[v] = i
 end
 
+-- run on game loads
+function Core.OnGameLoaded()
+    Core.InitGameValues()
+end
+
 local player, transactionSystem, scriptableSystemsContainer, statsSystem, equipSystem, itemSystem, playerEquipSystem
--- FIXME: Would ideally only initialize when a save is loaded.
-function Core.initGameValues()
+function Core.InitGameValues()
     player = Game.GetPlayer()
     transactionSystem = Game.GetTransactionSystem()
     statsSystem = Game.GetStatsSystem()
@@ -29,8 +33,6 @@ function Core.initGameValues()
 end
 
 function Core.ArmorSetRarity(desiredRarity, armorSlots)
-    Core.initGameValues()
-
     local results, total = "", 0
     for slot, selected in pairs(armorSlots) do
         if selected then
@@ -56,8 +58,6 @@ function Core.ArmorSetRarity(desiredRarity, armorSlots)
 end
 
 function Core.ArmorRemoveMods(armorSlots)
-    Core.initGameValues()
-
     local results = ""
     local removed = false
     for slot, selected in pairs(armorSlots) do
