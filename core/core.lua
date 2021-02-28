@@ -65,7 +65,7 @@ function Core.ArmorRemoveMods(armorSlots)
             local itemID = playerEquipSystem:GetActiveItem(slot)
             if itemID.tdbid.hash ~= nil then
                 local itemParts = Game['ItemModificationSystem::GetAllSlots;GameObjectItemID'](player, itemID)
-                for x, part in pairs(itemParts) do
+                for _, part in pairs(itemParts) do
                     if part.installedPart.tdbid.hash ~= 0 then
                         itemSystem:RemoveItemPart(player, itemID, part.slotID, true)
                         results = results .. 'Removed mod from ' .. slot .. "\n"

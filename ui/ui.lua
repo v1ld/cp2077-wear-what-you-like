@@ -25,7 +25,7 @@ function UI.run(version, core)
         ImGui.SetNextWindowPos(0, 250, ImGuiCond.FirstUseEver)
         ImGui.SetNextWindowSize(500, 425, ImGuiCond.Appearing)
 
-        if ImGui.Begin("UI") then
+        if ImGui.Begin("Wear What You Want") then
             ImGui.Spacing()
             ImGui.TextColored(1, 1, 0, 1, "Select armor slots to modify:")
 
