@@ -15,13 +15,8 @@ for i,v in pairs(rarityValue) do
     rarityName[v] = i
 end
 
--- run on game loads
-function Core.OnGameLoaded()
-    Core.InitGameValues()
-end
-
 local player, transactionSystem, scriptableSystemsContainer, statsSystem, equipSystem, itemSystem, playerEquipSystem
-function Core.InitGameValues()
+local function InitGameValues()
     player = Game.GetPlayer()
     transactionSystem = Game.GetTransactionSystem()
     statsSystem = Game.GetStatsSystem()
@@ -32,12 +27,32 @@ function Core.InitGameValues()
     playerEquipSystem['GetItemInEquipSlot2'] = playerEquipSystem['GetItemInEquipSlot;gamedataEquipmentAreaInt32']
 end
 
-function Core.ArmorSetRarity(desiredRarity, armorSlots)
+-- runs every new game / game load
+function Core.OnGameLoaded()
+    InitGameValues()
+end
+
+local weaponSlot = {
+    Weapon1 = 0,
+    Weapon2 = 1,
+    Weapon3 = 2
+}
+
+local function GetItemIDForSlot(slot)
+    -- Weapon slots have "Weapon" as their name and 0,1,2 as their sub-slot id
+    if (weaponSlot[slot]) then
+        return playerEquipSystem:GetItemInEquipSlot2("Weapon", weaponSlot[slot])
+    else
+        return playerEquipSystem:GetActiveItem(slot)
+    end
+end
+
+function Core.SetRarity(desiredRarity, equipmentSlots)
     local results, total = "", 0
-    for slot, selected in pairs(armorSlots) do
+    for slot, selected in pairs(equipmentSlots) do
         if selected then
             total = total + 1
-            local itemID = playerEquipSystem:GetActiveItem(slot)
+            local itemID = GetItemIDForSlot(slot)
             if itemID.tdbid.hash ~= 0 then
                 itemdata = transactionSystem:GetItemData(player, itemID)
                 statObj = itemdata:GetStatsObjectID()
@@ -52,24 +67,64 @@ function Core.ArmorSetRarity(desiredRarity, armorSlots)
         end
     end
     if (total == 0) then
-        results = "Select an armor slot to modify!\n"
+        results = "Select an equipment slot to modify!\n"
     end
     return results
 end
 
-function Core.ArmorRemoveMods(armorSlots)
+local modSlotNames = { 
+    "AttachmentSlots.GenericWeaponMod1",
+    "AttachmentSlots.GenericWeaponMod2",
+    "AttachmentSlots.GenericWeaponMod3",
+    "AttachmentSlots.GenericWeaponMod4",
+    "AttachmentSlots.MeleeWeaponMod1",
+    "AttachmentSlots.MeleeWeaponMod2",
+    "AttachmentSlots.MeleeWeaponMod3",
+    "AttachmentSlots.HeadFabricEnhancer1",
+    "AttachmentSlots.HeadFabricEnhancer2",
+    "AttachmentSlots.HeadFabricEnhancer3",
+    "AttachmentSlots.HeadFabricEnhancer4",
+    "AttachmentSlots.FaceFabricEnhancer1",
+    "AttachmentSlots.FaceFabricEnhancer2",
+    "AttachmentSlots.FaceFabricEnhancer3",
+    "AttachmentSlots.FaceFabricEnhancer4",
+    "AttachmentSlots.InnerChestFabricEnhancer1",
+    "AttachmentSlots.InnerChestFabricEnhancer2",
+    "AttachmentSlots.InnerChestFabricEnhancer3",
+    "AttachmentSlots.InnerChestFabricEnhancer4",
+    "AttachmentSlots.OuterChestFabricEnhancer1",
+    "AttachmentSlots.OuterChestFabricEnhancer2",
+    "AttachmentSlots.OuterChestFabricEnhancer3",
+    "AttachmentSlots.OuterChestFabricEnhancer4",
+    "AttachmentSlots.LegsFabricEnhancer1",
+    "AttachmentSlots.LegsFabricEnhancer2",
+    "AttachmentSlots.LegsFabricEnhancer3",
+    "AttachmentSlots.LegsFabricEnhancer4",
+    "AttachmentSlots.FootFabricEnhancer1",
+    "AttachmentSlots.FootFabricEnhancer2",
+    "AttachmentSlots.FootFabricEnhancer3",
+    "AttachmentSlots.FootFabricEnhancer4"
+}
+
+local modSlot = { }
+for _, slotName in ipairs(modSlotNames) do
+    modSlot[tostring(TweakDBID.new(slotName))] = string.sub(slotName, -1)
+end
+
+function Core.RemoveMods(equipmentSlots)
     local results = ""
     local removed = false
-    for slot, selected in pairs(armorSlots) do
+    for slot, selected in pairs(equipmentSlots) do
         if selected then
-            local itemID = playerEquipSystem:GetActiveItem(slot)
+            local itemID = GetItemIDForSlot(slot)
             if itemID.tdbid.hash ~= nil then
                 local itemParts = Game['ItemModificationSystem::GetAllSlots;GameObjectItemID'](player, itemID)
                 for _, part in pairs(itemParts) do
-                    if part.installedPart.tdbid.hash ~= 0 then
+                    -- must be a mod slot with a mod equipped
+                    if modSlot[tostring(part.slotID)] ~= nil and part.installedPart.tdbid.hash ~= 0 then
                         itemSystem:RemoveItemPart(player, itemID, part.slotID, true)
-                        results = results .. 'Removed mod from ' .. slot .. "\n"
                         removed = true
+                        results = results .. 'Unequipped ' .. slot .. ' slot ' .. modSlot[tostring(part.slotID)] .. "\n"
                     end
                 end
             end
