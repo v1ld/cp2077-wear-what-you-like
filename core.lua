@@ -16,7 +16,7 @@ for i,v in pairs(rarityValue) do
 end
 
 local player, transactionSystem, scriptableSystemsContainer, statsSystem, equipSystem, itemSystem, playerEquipSystem
-local function InitGameValues()
+function Core.InitGameValues()
     player = Game.GetPlayer()
     transactionSystem = Game.GetTransactionSystem()
     statsSystem = Game.GetStatsSystem()
@@ -25,11 +25,6 @@ local function InitGameValues()
     itemSystem = scriptableSystemsContainer:Get(CName.new("ItemModificationSystem"))
     playerEquipSystem = equipSystem:GetPlayerData(player)
     playerEquipSystem['GetItemInEquipSlot2'] = playerEquipSystem['GetItemInEquipSlot;gamedataEquipmentAreaInt32']
-end
-
--- runs every new game / game load
-function Core.OnGameLoaded()
-    InitGameValues()
 end
 
 local weaponSlot = {
@@ -48,6 +43,8 @@ local function GetItemIDForSlot(slot)
 end
 
 function Core.SetRarity(desiredRarity, equipmentSlots)
+    Core.InitGameValues()
+
     local results, total = "", 0
     for slot, selected in pairs(equipmentSlots) do
         if selected then
@@ -112,6 +109,8 @@ for _, slotName in ipairs(modSlotNames) do
 end
 
 function Core.RemoveMods(equipmentSlots)
+    Core.InitGameValues()
+
     local results = ""
     local removed = false
     for slot, selected in pairs(equipmentSlots) do

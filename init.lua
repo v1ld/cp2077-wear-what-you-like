@@ -3,17 +3,13 @@
 
 WearWhatYouWant = {
     description = 'WearWhatYouWant allows you to add slots unequip mods from armor',
-    version = 'v1.1'
+    version = 'v1.1.1'
 }
 
 local UI = require('ui')
 local Core = require('core')
-local GameUI = require('GameUI')
 
 registerForEvent("onInit", function()
-    GameUI.OnLoaded(function()
-        Core.OnGameLoaded()
-    end)
     print('WearWhatYouWant ' .. WearWhatYouWant.version .. ' initialized!')
 end)
 
