@@ -42,6 +42,12 @@ local function GetItemIDForSlot(slot)
     end
 end
 
+local function GetDisplayNameForItem(itemID)
+    local displayNameTweakDBID = TweakDBID.new(itemID.id, '.displayName')
+    local displayNameLocKey = Game['TDB::GetLocKey;TweakDBID'](displayNameTweakDBID)
+    return Game.GetLocalizedTextByKey(displayNameLocKey)
+end
+
 function Core.SetRarity(desiredRarity, equipmentSlots)
     Core.InitGameValues()
 
@@ -59,7 +65,7 @@ function Core.SetRarity(desiredRarity, equipmentSlots)
                     local qualityMod = Game['gameRPGManager::CreateStatModifier;gamedataStatTypegameStatModifierTypeFloat']('Quality', 'Additive', rarityValue[desiredRarity])
                     statsSystem:AddSavedModifier(statObj, qualityMod)
                 end
-                results = results .. slot .. ': ' .. rarityName[math.floor(itemQuality)] .. ' => ' .. desiredRarity .. "\n"
+                results = string.format("%s%s: %s => %s (%s)\n", results, GetDisplayNameForItem(itemID), rarityName[math.floor(itemQuality)], desiredRarity, slot)
             end
         end
     end
@@ -123,7 +129,7 @@ function Core.RemoveMods(equipmentSlots)
                     if modSlot[tostring(part.slotID)] ~= nil and part.installedPart.tdbid.hash ~= 0 then
                         itemSystem:RemoveItemPart(player, itemID, part.slotID, true)
                         removed = true
-                        results = results .. 'Unequipped ' .. slot .. ' slot ' .. modSlot[tostring(part.slotID)] .. "\n"
+                        results = string.format("%s%s: %s (%s)\n", results, GetDisplayNameForItem(itemID), GetDisplayNameForItem(part.installedPart), slot)
                     end
                 end
             end
