@@ -111,14 +111,13 @@ local modSlotNames = {
 
 local modSlot = { }
 for _, slotName in ipairs(modSlotNames) do
-    modSlot[tostring(TweakDBID.new(slotName))] = string.sub(slotName, -1)
+    modSlot[slotName] = string.sub(slotName, -1)
 end
 
 function Core.RemoveMods(equipmentSlots)
     Core.InitGameValues()
 
-    local results = ""
-    local removed = false
+    local results, removed = "", false
     for slot, selected in pairs(equipmentSlots) do
         if selected then
             local itemID = GetItemIDForSlot(slot)
