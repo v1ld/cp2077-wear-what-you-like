@@ -10,6 +10,7 @@ local UI = require('ui')
 local Core = require('core')
 
 registerForEvent("onInit", function()
+    Core.OnInit()
     print('WearWhatYouWant ' .. WearWhatYouWant.version .. ' initialized!')
 end)
 
