@@ -19,18 +19,6 @@ for i,v in pairs(rarityValue) do
     rarityName[v] = i
 end
 
-local player, transactionSystem, scriptableSystemsContainer, statsSystem, equipSystem, itemSystem, playerEquipSystem
-function Core.InitGameValues()
-    player = Game.GetPlayer()
-    transactionSystem = Game.GetTransactionSystem()
-    statsSystem = Game.GetStatsSystem()
-    scriptableSystemsContainer = Game.GetScriptableSystemsContainer()
-    equipSystem = scriptableSystemsContainer:Get(CName.new("EquipmentSystem"))
-    itemSystem = scriptableSystemsContainer:Get(CName.new("ItemModificationSystem"))
-    playerEquipSystem = equipSystem:GetPlayerData(player)
-    playerEquipSystem['GetItemInEquipSlot2'] = playerEquipSystem['GetItemInEquipSlot;gamedataEquipmentAreaInt32']
-end
-
 local weaponSlot = {
     Weapon1 = 0,
     Weapon2 = 1,
@@ -38,9 +26,10 @@ local weaponSlot = {
 }
 
 local function GetItemIDForSlot(slot)
+    local playerEquipSystem = Game.GetScriptableSystemsContainer():Get("EquipmentSystem"):GetPlayerData(Game.GetPlayer())
     -- Weapon slots have "Weapon" as their name and 0,1,2 as their sub-slot id
     if (weaponSlot[slot]) then
-        return playerEquipSystem:GetItemInEquipSlot2("Weapon", weaponSlot[slot])
+        return playerEquipSystem:GetItemInEquipSlot("Weapon", weaponSlot[slot])
     else
         return playerEquipSystem:GetActiveItem(slot)
     end
@@ -48,26 +37,23 @@ end
 
 local function GetDisplayNameForItem(itemID)
     local displayNameTweakDBID = TweakDBID.new(itemID.id, '.displayName')
-    local displayNameLocKey = Game['TDB::GetLocKey;TweakDBID'](displayNameTweakDBID)
+    local displayNameLocKey = TDB.GetLocKey(displayNameTweakDBID)
     return Game.GetLocalizedTextByKey(displayNameLocKey)
 end
 
 function Core.SetRarity(desiredRarity, equipmentSlots)
-    Core.InitGameValues()
-
     local results, total = "", 0
     for slot, selected in pairs(equipmentSlots) do
         if selected then
             total = total + 1
             local itemID = GetItemIDForSlot(slot)
             if itemID.tdbid.hash ~= 0 then
-                itemdata = transactionSystem:GetItemData(player, itemID)
-                statObj = itemdata:GetStatsObjectID()
-                local itemQuality = statsSystem:GetStatValue(statObj, 'Quality')
+                local statsObjectID = Game.GetTransactionSystem():GetItemData(Game.GetPlayer(), itemID):GetStatsObjectID()
+                local itemQuality = Game.GetStatsSystem():GetStatValue(statsObjectID, 'Quality')
                 if itemQuality ~= rarityValue[desiredRarity] then
-                    statsSystem:RemoveAllModifiers(statObj, 'Quality', true)
-                    local qualityMod = Game['gameRPGManager::CreateStatModifier;gamedataStatTypegameStatModifierTypeFloat']('Quality', 'Additive', rarityValue[desiredRarity])
-                    statsSystem:AddSavedModifier(statObj, qualityMod)
+                    Game.GetStatsSystem():RemoveAllModifiers(statsObjectID, 'Quality', true)
+                    local qualityMod = RPGManager.CreateStatModifier('Quality', 'Additive', rarityValue[desiredRarity])
+                    Game.GetStatsSystem():AddSavedModifier(statsObjectID, qualityMod)
                 end
                 results = string.format("%s%s: %s => %s (%s)\n", results, GetDisplayNameForItem(itemID), rarityName[math.floor(itemQuality)], desiredRarity, slot)
             end
@@ -122,18 +108,16 @@ function Core.InitModSlots()
 end
 
 function Core.RemoveMods(equipmentSlots)
-    Core.InitGameValues()
-
     local results, removed = "", false
     for slot, selected in pairs(equipmentSlots) do
         if selected then
             local itemID = GetItemIDForSlot(slot)
             if itemID.tdbid.hash ~= nil then
-                local itemParts = Game['ItemModificationSystem::GetAllSlots;GameObjectItemID'](player, itemID)
+                local itemParts = Game.GetScriptableSystemsContainer():Get("ItemModificationSystem").GetAllSlots(Game.GetPlayer(), itemID)
                 for _, part in pairs(itemParts) do
                     -- must be a mod slot with a mod equipped
                     if modSlot[tostring(part.slotID)] ~= nil and part.installedPart.tdbid.hash ~= 0 then
-                        itemSystem:RemoveItemPart(player, itemID, part.slotID, true)
+                        Game.GetScriptableSystemsContainer():Get("ItemModificationSystem"):RemoveItemPart(Game.GetPlayer(), itemID, part.slotID, true)
                         removed = true
                         results = string.format("%s%s: %s (%s)\n", results, GetDisplayNameForItem(itemID), GetDisplayNameForItem(part.installedPart), slot)
                     end
