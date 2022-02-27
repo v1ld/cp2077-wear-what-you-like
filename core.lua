@@ -51,7 +51,7 @@ function Core.SetRarity(desiredRarity, equipmentSlots)
                     local qualityMod = RPGManager.CreateStatModifier('Quality', 'Additive', rarityValue[desiredRarity])
                     Game.GetStatsSystem():AddSavedModifier(statsObjectID, qualityMod)
                 end
-                results = string.format("%s%s: %s => %s (%s)\n", results, GetDisplayNameForItem(itemID), rarityName[math.floor(itemQuality)], desiredRarity, slot)
+                results = string.format("%s%s: %s -> %s (%s)\n", results, GetDisplayNameForItem(itemID), rarityName[math.floor(itemQuality)], desiredRarity, slot)
             end
         end
     end
@@ -129,7 +129,7 @@ function Core.RemoveMods(equipmentSlots)
 end
 
 function Core.LevelUp(equipmentSlots)
-    local nLeveled, nSkipped = 0, 0
+    local results = ""
     local playerPowerLevel = Game.GetStatsSystem():GetStatValue(Game.GetPlayer():GetEntityID(), 'PowerLevel') or 0.0
     for slot, selected in pairs(equipmentSlots) do
         if selected then
@@ -138,20 +138,22 @@ function Core.LevelUp(equipmentSlots)
                 local gameItemData = Game.GetTransactionSystem():GetItemData(Game.GetPlayer(), itemID)
                 local itemPowerLevel   = gameItemData:GetStatValueByType('PowerLevel') or 0.0
                 local itemUpgradeLevel = gameItemData:GetStatValueByType('WasItemUpgraded') or 0.0
+                local itemLevel = itemPowerLevel + itemUpgradeLevel
                 -- leveling up items at or one level below the player level can cause a drop in stats, so don't
-                if itemPowerLevel + itemUpgradeLevel < playerPowerLevel - 1 then
+                if itemLevel < playerPowerLevel - 1 then
                     -- true item level = base item level + item upgrade levels
-                    -- so remove the item upgrade levels first before we bump the base item level to player level
+                    -- remove the item upgrade levels first before we bump the base item level to player level
                     Game.GetStatsSystem():RemoveAllModifiers(gameItemData:GetStatsObjectID(), 'WasItemUpgraded', true)
                     Game.GetScriptableSystemsContainer():Get(CName.new('CraftingSystem')):SetItemLevel(gameItemData)
-                    nLeveled = nLeveled + 1
+                    local newItemLevel = gameItemData:GetStatValueByType('PowerLevel') or 0.0
+                    results = string.format("%s%s: Level %f -> %f\n", results, GetDisplayNameForItem(itemID), itemLevel, newItemLevel)
                 else
-                    nSkipped = nSkipped + 1
+                    results = string.format("%s%s: Level %f, skipping\n", results, GetDisplayNameForItem(itemID), itemLevel)
                 end
             end
         end
     end
-    return string.format("Leveled %d items, skipped %d items\n", nLeveled, nSkipped)
+    return results
 end
 
 return Core
