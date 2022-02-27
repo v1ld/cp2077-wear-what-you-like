@@ -3,7 +3,7 @@
 
 WearWhatYouWant = {
     description = 'WearWhatYouWant allows you to add slots unequip mods from armor',
-    version = 'v1.1.2'
+    version = 'v2.0'
 }
 
 local UI = require('ui')
