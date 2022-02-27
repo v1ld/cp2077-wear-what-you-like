@@ -146,9 +146,9 @@ function Core.LevelUp(equipmentSlots)
                     Game.GetStatsSystem():RemoveAllModifiers(gameItemData:GetStatsObjectID(), 'WasItemUpgraded', true)
                     Game.GetScriptableSystemsContainer():Get(CName.new('CraftingSystem')):SetItemLevel(gameItemData)
                     local newItemLevel = gameItemData:GetStatValueByType('PowerLevel') or 0.0
-                    results = string.format("%s%s: Level %f -> %f\n", results, GetDisplayNameForItem(itemID), itemLevel, newItemLevel)
+                    results = string.format("%s%s: Level %f -> %f (%s)\n", results, GetDisplayNameForItem(itemID), itemLevel, newItemLevel, slot)
                 else
-                    results = string.format("%s%s: Level %f, skipping\n", results, GetDisplayNameForItem(itemID), itemLevel)
+                    results = string.format("%s%s: Level %f, skipping (%s)\n", results, GetDisplayNameForItem(itemID), itemLevel, slot)
                 end
             end
         end
