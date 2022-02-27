@@ -3,10 +3,6 @@
 
 local Core = {}
 
-function Core.OnInit()
-    Core.InitModSlots()
-end
-
 local rarityValue = {
     Common = 0,
     Uncommon = 1,
@@ -101,13 +97,13 @@ local modSlotNames = {
 
 local modSlot = { }
 
-function Core.InitModSlots()
-    for _, slotName in ipairs(modSlotNames) do
-        modSlot[tostring(TweakDBID.new(slotName))] = string.sub(slotName, -1)
-    end
-end
-
 function Core.RemoveMods(equipmentSlots)
+    if next(modSlot) == nil then
+        for _, slotName in ipairs(modSlotNames) do
+            modSlot[tostring(TweakDBID.new(slotName))] = string.sub(slotName, -1)
+        end
+    end
+
     local results, removed = "", false
     for slot, selected in pairs(equipmentSlots) do
         if selected then
