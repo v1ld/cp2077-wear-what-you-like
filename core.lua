@@ -132,4 +132,30 @@ function Core.RemoveMods(equipmentSlots)
     return results
 end
 
+function Core.LevelUp(equipmentSlots)
+    local nLeveled, nSkipped = 0, 0
+    local playerPowerLevel = Game.GetStatsSystem():GetStatValue(Game.GetPlayer():GetEntityID(), 'PowerLevel') or 0.0
+    for slot, selected in pairs(equipmentSlots) do
+        if selected then
+            local itemID = GetItemIDForSlot(slot)
+            if itemID.tdbid.hash ~= nil then
+                local gameItemData = Game.GetTransactionSystem():GetItemData(Game.GetPlayer(), itemID)
+                local itemPowerLevel   = gameItemData:GetStatValueByType('PowerLevel') or 0.0
+                local itemUpgradeLevel = gameItemData:GetStatValueByType('WasItemUpgraded') or 0.0
+                -- leveling up items at or one level below the player level can cause a drop in stats, so don't
+                if itemPowerLevel + itemUpgradeLevel < playerPowerLevel - 1 then
+                    -- true item level = base item level + item upgrade levels
+                    -- so remove the item upgrade levels first before we bump the base item level to player level
+                    Game.GetStatsSystem():RemoveAllModifiers(gameItemData:GetStatsObjectID(), 'WasItemUpgraded', true)
+                    Game.GetScriptableSystemsContainer():Get(CName.new('CraftingSystem')):SetItemLevel(gameItemData)
+                    nLeveled = nLeveled + 1
+                else
+                    nSkipped = nSkipped + 1
+                end
+            end
+        end
+    end
+    return string.format("Leveled %d items, skipped %d items\n", nLeveled, nSkipped)
+end
+
 return Core

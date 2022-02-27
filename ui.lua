@@ -74,11 +74,22 @@ function UI.run(version)
             }
             local lastLog = ""
 
-            ImGui.Spacing()
-            ImGui.TextColored(1, 1, 0, 1, "Armor or weapon mods:")
-            ImGui.Spacing()
-            if (ImGui.Button("Remove mods", buttonWidth, buttonHeight)) then
-                lastLog = Core.RemoveMods(equipmentSlots)
+            if ImGui.BeginTable("Table2", 2) then
+                ImGui.TableNextRow()
+                ImGui.TableSetColumnIndex(0)
+                ImGui.TextColored(1, 1, 0, 1, "Armor or weapon mods:")
+                ImGui.Spacing()
+                if (ImGui.Button("Remove mods", buttonWidth, buttonHeight)) then
+                    lastLog = Core.RemoveMods(equipmentSlots)
+                end
+
+                ImGui.TableNextColumn()
+                ImGui.TextColored(1, 1, 0, 1, "Upgrade to player level:")
+                ImGui.Spacing()
+                if (ImGui.Button("Level up", buttonWidth, buttonHeight)) then
+                    lastLog = Core.LevelUp(equipmentSlots)
+                end
+                ImGui.EndTable()
             end
             ImGui.Spacing()
             ImGui.Separator()
