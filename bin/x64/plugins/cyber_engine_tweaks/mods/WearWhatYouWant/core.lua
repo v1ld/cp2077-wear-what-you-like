@@ -136,19 +136,23 @@ function Core.LevelUp(equipmentSlots)
             local itemID = GetItemIDForSlot(slot)
             if itemID.tdbid.hash ~= nil then
                 local gameItemData = Game.GetTransactionSystem():GetItemData(Game.GetPlayer(), itemID)
-                local itemPowerLevel   = gameItemData:GetStatValueByType('PowerLevel') or 0.0
-                local itemUpgradeLevel = gameItemData:GetStatValueByType('WasItemUpgraded') or 0.0
-                local itemLevel = itemPowerLevel + itemUpgradeLevel
-                -- leveling up items at or one level below the player level can cause a drop in stats, so don't
-                if itemLevel < playerPowerLevel - 1 then
-                    -- true item level = base item level + item upgrade levels
-                    -- remove the item upgrade levels first before we bump the base item level to player level
-                    Game.GetStatsSystem():RemoveAllModifiers(gameItemData:GetStatsObjectID(), 'WasItemUpgraded', true)
-                    Game.GetScriptableSystemsContainer():Get(CName.new('CraftingSystem')):SetItemLevel(gameItemData)
-                    local newItemLevel = gameItemData:GetStatValueByType('PowerLevel') or 0.0
-                    results = string.format("%s%s: Level %f -> %f (%s)\n", results, GetDisplayNameForItem(itemID), itemLevel, newItemLevel, slot)
+                if gameItemData ~= nil then
+                    local itemPowerLevel   = gameItemData:GetStatValueByType('PowerLevel') or 0.0
+                    local itemUpgradeLevel = gameItemData:GetStatValueByType('WasItemUpgraded') or 0.0
+                    local itemLevel = itemPowerLevel + itemUpgradeLevel
+                    -- leveling up items at or one level below the player level can cause a drop in stats, so don't
+                    if itemLevel < playerPowerLevel - 1 then
+                        -- true item level = base item level + item upgrade levels
+                        -- remove the item upgrade levels first before we bump the base item level to player level
+                        Game.GetStatsSystem():RemoveAllModifiers(gameItemData:GetStatsObjectID(), 'WasItemUpgraded', true)
+                        Game.GetScriptableSystemsContainer():Get(CName.new('CraftingSystem')):SetItemLevel(gameItemData)
+                        local newItemLevel = gameItemData:GetStatValueByType('PowerLevel') or 0.0
+                        results = string.format("%s%s: Level %f -> %f (%s)\n", results, GetDisplayNameForItem(itemID), itemLevel, newItemLevel, slot)
+                    else
+                        results = string.format("%s%s: Level %f, skipping (%s)\n", results, GetDisplayNameForItem(itemID), itemLevel, slot)
+                    end
                 else
-                    results = string.format("%s%s: Level %f, skipping (%s)\n", results, GetDisplayNameForItem(itemID), itemLevel, slot)
+                    results = string.format("%s%s: Skipping empty slot\n", results, slot)
                 end
             end
         end
